@@ -1,23 +1,3 @@
-import Link from 'next/link';
-import { getCompanies } from '@/lib/companies';
-
-const lists = [
-  {
-    href: '/ned-astr',
-    label: 'Астрахань',
-    title: 'Агентства недвижимости',
-    count: getCompanies('ned-astr').length,
-    tone: 'sand',
-  },
-  {
-    href: '/komp',
-    label: 'Алматы',
-    title: 'Компьютеры и сервис',
-    count: getCompanies('komp').length,
-    tone: 'sage',
-  },
-];
-
 export default function Home() {
   return (
     <main className="home-shell">
