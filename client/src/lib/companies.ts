@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export type DatasetId = 'komp' | 'mebel' | 'center' | 'ned-astr';
+export type DatasetId = 'komp' | 'mebel' | 'center' | 'center-al' | 'ned-astr';
 
 export type Company = {
   id: string;
@@ -14,6 +14,7 @@ const datasetFiles: Record<DatasetId, string> = {
   komp: 'komp.csv',
   mebel: 'mebel.csv',
   center: 'center.csv',
+  'center-al': 'center-al.csv',
   'ned-astr': 'ned-astr.csv',
 };
 
