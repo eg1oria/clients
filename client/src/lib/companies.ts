@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-
-export type DatasetId = 'komp' | 'mebel' | 'center' | 'center-al' | 'ned-astr' | 'meb-al';
 
 export type Company = {
   id: string;
@@ -10,14 +8,71 @@ export type Company = {
   telegram?: string;
 };
 
-const datasetFiles: Record<DatasetId, string> = {
-  komp: 'komp.csv',
-  mebel: 'mebel.csv',
-  center: 'center.csv',
-  'center-al': 'center-al.csv',
-  'ned-astr': 'ned-astr.csv',
-  'meb-al': 'meb-al.csv',
+export type Dataset = {
+  id: string;
+  fileName: string;
+  title: string;
+  eyebrow: string;
 };
+
+const datasetCopy: Record<string, Pick<Dataset, 'title' | 'eyebrow'>> = {
+  komp: {
+    title: 'Компьютерные компании',
+    eyebrow: 'Алматы · Компьютеры и сервис',
+  },
+  mebel: {
+    title: 'Магазины мебели',
+    eyebrow: 'Астана · Мебель',
+  },
+  center: {
+    title: 'Бизнес-центры',
+    eyebrow: 'Астана · Бизнес-центры',
+  },
+  'center-al': {
+    title: 'Бизнес-центры',
+    eyebrow: 'Алматы · Бизнес-центры',
+  },
+  'ned-astr': {
+    title: 'Агентства недвижимости',
+    eyebrow: 'Астрахань · Недвижимость',
+  },
+  'meb-al': {
+    title: 'Магазины мебели',
+    eyebrow: 'Алматы · Мебель',
+  },
+};
+
+const publicDirectory = path.join(process.cwd(), 'public');
+
+function defaultTitle(id: string) {
+  return id
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((word) => word[0].toLocaleUpperCase('ru-RU') + word.slice(1))
+    .join(' ');
+}
+
+export function getDatasets(): Dataset[] {
+  return readdirSync(publicDirectory, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === '.csv')
+    .map((entry) => {
+      const id = entry.name.slice(0, -path.extname(entry.name).length);
+      const copy = datasetCopy[id];
+
+      return {
+        id,
+        fileName: entry.name,
+        title: copy?.title ?? defaultTitle(id),
+        eyebrow: copy?.eyebrow ?? `Список · ${entry.name}`,
+      };
+    })
+    .filter((dataset) => dataset.id.length > 0 && dataset.id !== '.' && dataset.id !== '..')
+    .sort((left, right) => left.title.localeCompare(right.title, 'ru-RU'));
+}
+
+export function getDataset(id: string) {
+  return getDatasets().find((dataset) => dataset.id === id);
+}
 
 function parseCsv(source: string): string[][] {
   const rows: string[][] = [];
@@ -82,8 +137,12 @@ function normalizeName(name: string) {
   return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 }
 
-export function getCompanies(dataset: DatasetId): Company[] {
-  const filePath = path.join(process.cwd(), 'public', datasetFiles[dataset]);
+export function getCompanies(datasetId: string): Company[] {
+  const dataset = getDataset(datasetId);
+
+  if (!dataset) return [];
+
+  const filePath = path.join(publicDirectory, dataset.fileName);
   const [headerRow, ...dataRows] = parseCsv(readFileSync(filePath, 'utf8'));
 
   if (!headerRow) return [];
@@ -111,7 +170,7 @@ export function getCompanies(dataset: DatasetId): Company[] {
     }
 
     companies.set(normalizedName, {
-      id: `${dataset}:${normalizedName}`,
+      id: `${datasetId}:${normalizedName}`,
       name,
       whatsapp,
       telegram,

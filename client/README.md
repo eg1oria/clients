@@ -16,6 +16,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Добавление списка
+
+Поместите CSV-файл в папку `public`. Список автоматически появится на главной странице и будет доступен по адресу, совпадающему с именем файла: например, `public/almaty.csv` откроется на `/almaty`.
+
+CSV должен содержать колонку `Наименование` и хотя бы одну из колонок `WhatsApp 1`, `WhatsApp 2`, `WhatsApp 3`, `Telegram 1` или `Telegram 2`. После добавления файла перезапустите production-сборку приложения.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
