@@ -87,7 +87,8 @@ export default function BarberExamplePage() {
           <a
             href="#booking"
             className="hidden items-center gap-5 rounded-full bg-[#bcff45] py-2 pl-5 pr-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#171714] transition-transform hover:scale-[1.03] lg:flex">
-            Записаться
+            <span className="text-[#171714]/70">Записаться</span>
+
             <span className="grid size-9 place-items-center rounded-full bg-[#171714] text-white">
               <ArrowIcon diagonal />
             </span>
@@ -100,7 +101,7 @@ export default function BarberExamplePage() {
           <div className="max-w-[820px]">
             <p className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75 sm:text-xs">
               <span className="inline-block size-1.5 rounded-full bg-[#bcff45]" />
-              Барбершоп · Санкт-Петербург
+              Барбершоп · Алматы
             </p>
             <h1 className="max-w-[11ch] text-[clamp(3.15rem,15vw,6rem)] font-medium uppercase leading-[0.86] tracking-[-0.075em] lg:max-w-[9ch] lg:text-[118px]">
               Хорошая форма. <span className="text-[#bcff45]">Сильный</span> характер.
@@ -115,7 +116,7 @@ export default function BarberExamplePage() {
               <a
                 href="#booking"
                 className="flex h-14 w-full items-center justify-between rounded-full bg-[#bcff45] pl-6 pr-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#171714] transition-transform active:scale-[.98] sm:w-[255px]">
-                Выбрать время
+                <span className="text-[#171714]/70">Выбрать время</span>
                 <span className="grid size-10 place-items-center rounded-full bg-[#171714] text-white">
                   <ArrowIcon diagonal />
                 </span>
