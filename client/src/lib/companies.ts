@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
-export type DatasetId = "komp" | "mebel" | "ned-astr";
+export type DatasetId = 'komp' | 'mebel' | 'center' | 'ned-astr';
 
 export type Company = {
   id: string;
@@ -11,18 +11,19 @@ export type Company = {
 };
 
 const datasetFiles: Record<DatasetId, string> = {
-  komp: "komp.csv",
-  mebel: "mebel.csv",
-  "ned-astr": "ned-astr.csv",
+  komp: 'komp.csv',
+  mebel: 'mebel.csv',
+  center: 'center.csv',
+  'ned-astr': 'ned-astr.csv',
 };
 
 function parseCsv(source: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
-  let field = "";
+  let field = '';
   let quoted = false;
 
-  const text = source.replace(/^\uFEFF/, "");
+  const text = source.replace(/^\uFEFF/, '');
 
   for (let index = 0; index < text.length; index += 1) {
     const character = text[index];
@@ -37,14 +38,14 @@ function parseCsv(source: string): string[][] {
       continue;
     }
 
-    if (character === "," && !quoted) {
+    if (character === ',' && !quoted) {
       row.push(field);
-      field = "";
+      field = '';
       continue;
     }
 
-    if ((character === "\n" || character === "\r") && !quoted) {
-      if (character === "\r" && text[index + 1] === "\n") {
+    if ((character === '\n' || character === '\r') && !quoted) {
+      if (character === '\r' && text[index + 1] === '\n') {
         index += 1;
       }
 
@@ -53,7 +54,7 @@ function parseCsv(source: string): string[][] {
         rows.push(row);
       }
       row = [];
-      field = "";
+      field = '';
       continue;
     }
 
@@ -76,12 +77,12 @@ function firstValue(record: Record<string, string>, fields: string[]) {
 }
 
 function normalizeName(name: string) {
-  return name.trim().replace(/\s+/g, " ").toLocaleLowerCase("ru-RU");
+  return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 }
 
 export function getCompanies(dataset: DatasetId): Company[] {
-  const filePath = path.join(process.cwd(), "public", datasetFiles[dataset]);
-  const [headerRow, ...dataRows] = parseCsv(readFileSync(filePath, "utf8"));
+  const filePath = path.join(process.cwd(), 'public', datasetFiles[dataset]);
+  const [headerRow, ...dataRows] = parseCsv(readFileSync(filePath, 'utf8'));
 
   if (!headerRow) return [];
 
@@ -90,15 +91,11 @@ export function getCompanies(dataset: DatasetId): Company[] {
 
   for (const values of dataRows) {
     const record = Object.fromEntries(
-      headers.map((header, index) => [header, values[index] ?? ""]),
+      headers.map((header, index) => [header, values[index] ?? '']),
     );
-    const name = record["Наименование"]?.trim().replace(/\s+/g, " ");
-    const whatsapp = firstValue(record, [
-      "WhatsApp 1",
-      "WhatsApp 2",
-      "WhatsApp 3",
-    ]);
-    const telegram = firstValue(record, ["Telegram 1", "Telegram 2"]);
+    const name = record['Наименование']?.trim().replace(/\s+/g, ' ');
+    const whatsapp = firstValue(record, ['WhatsApp 1', 'WhatsApp 2', 'WhatsApp 3']);
+    const telegram = firstValue(record, ['Telegram 1', 'Telegram 2']);
 
     if (!name || (!whatsapp && !telegram)) continue;
 
