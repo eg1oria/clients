@@ -1,15 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import {
-  useCallback,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import type { Company } from "@/lib/companies";
+import Link from 'next/link';
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import type { Company } from '@/lib/companies';
 
-type ContactChannel = "whatsapp" | "telegram";
+type ContactChannel = 'whatsapp' | 'telegram';
 
 type ContactBoardProps = {
   companies: Company[];
@@ -20,58 +15,54 @@ type ContactBoardProps = {
 
 const messageTemplates = [
   (name: string) =>
-    `Здравствуйте! Посмотрел информацию о компании «${name}» и хотел предложить разработку современного сайта-лендинга. Он поможет понятно представить ваши услуги, повысить доверие клиентов и превращать больше посетителей из поиска и соцсетей в обращения. Могу показать, как такой сайт может выглядеть именно для вашего бизнеса. Интересно обсудить?`,
+    `Здравствуйте! Посмотрел компанию «${name}». Заметил, что отдельного сайта у вас сейчас нет. Я занимаюсь разработкой сайтов под бизнес и могу бесплатно показать, как можно было бы представить ваши услуги и собирать обращения через сайт. Если интересно — набросаю пример структуры именно для «${name}».`,
+
   (name: string) =>
-    `Добрый день! Увидел компанию «${name}». Для вашего бизнеса можно сделать быстрый и удобный лендинг, где клиент сразу поймёт ваши преимущества и сможет оставить заявку или связаться в один клик. Такой сайт хорошо работает на телефонах и помогает не терять заинтересованных клиентов. Хотите, предложу концепцию?`,
+    `Добрый день! Нашёл компанию «${name}» и решил написать напрямую. Могу сделать для вас сайт, который не просто рассказывает о компании, а ведёт клиента к конкретному действию: звонку, сообщению или заявке. При необходимости подключаю Telegram, WhatsApp, CRM и аналитику. Могу показать вариант, как это могло бы выглядеть у вас — интересно?`,
+
   (name: string) =>
-    `Здравствуйте! Есть идея для компании «${name}»: аккуратный одностраничный сайт, который соберёт услуги, преимущества и контакты в одном месте. Лендинг укрепляет доверие к бизнесу и помогает получать больше целевых обращений без лишних шагов для клиента. Могу бесплатно набросать структуру и обсудить детали.`,
+    `Здравствуйте! Посмотрел «${name}». Есть несколько идей, как можно упаковать компанию в интернете без большого и дорогого сайта: сделать компактную страницу с услугами, преимуществами, примерами работ и быстрым способом связаться с вами. Если хотите, могу бесплатно набросать первый экран и структуру — просто чтобы вы увидели идею.`,
+
   (name: string) =>
-    `Добрый день! Предлагаю создать для «${name}» современный лендинг. Он будет быстро загружаться, удобно смотреться со смартфона и вести посетителя прямо к заявке. Для бизнеса это дополнительный канал продаж, понятная презентация услуг и более профессиональный образ в интернете. Было бы интересно узнать подробности?`,
+    `Добрый день! Я разработчик, занимаюсь сайтами и автоматизацией для бизнеса. Обратил внимание на «${name}» и думаю, здесь можно сделать полезный сайт под ваши реальные задачи: заявки, каталог, запись, расчёт стоимости или интеграцию с CRM — в зависимости от того, как вы работаете с клиентами. Могу предложить конкретный вариант под вашу компанию. Обсудим?`,
+
   (name: string) =>
-    `Здравствуйте! Обратил внимание на «${name}» и хочу предложить сайт-лендинг под ваш бизнес. На нём можно коротко показать, почему клиенту стоит выбрать вас, ответить на основные вопросы и добавить удобные кнопки связи. Это помогает повысить доверие и получать обращения круглосуточно. Могу предложить вариант структуры без обязательств.`,
+    `Здравствуйте! Увидел компанию «${name}». Не хочу предлагать вам просто «сделать сайт» — сначала хотел бы понять, как к вам сейчас приходят клиенты. Если есть смысл, могу предложить решение именно под этот процесс: от небольшой посадочной страницы до каталога, форм заявок и интеграции с вашей CRM. Могу бесплатно показать несколько идей для «${name}». Интересно?`,
 ];
 
-const storageEventName = "leadlist:storage";
+const storageEventName = 'leadlist:storage';
 
 function getRandomMessage(companyName: string) {
-  const template =
-    messageTemplates[Math.floor(Math.random() * messageTemplates.length)];
+  const template = messageTemplates[Math.floor(Math.random() * messageTemplates.length)];
   return template(companyName);
 }
 
 function safeStoredIds(value: string) {
   try {
     const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed)
-      ? parsed.filter((id): id is string => typeof id === "string")
-      : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
   } catch {
     return [];
   }
 }
 
-function addMessageToLink(
-  source: string,
-  channel: ContactChannel,
-  message: string,
-) {
-  if (channel === "whatsapp") {
-    const phone = source.match(/(?:wa\.me\/|phone=)(\d+)/i)?.[1] ??
-      source.replace(/\D/g, "");
+function addMessageToLink(source: string, channel: ContactChannel, message: string) {
+  if (channel === 'whatsapp') {
+    const phone = source.match(/(?:wa\.me\/|phone=)(\d+)/i)?.[1] ?? source.replace(/\D/g, '');
     const params = new URLSearchParams({ phone, text: message });
 
     return `whatsapp://send?${params.toString()}`;
   }
 
-  const fallbackHost = "t.me";
+  const fallbackHost = 't.me';
   const trimmed = source.trim();
   const normalized = /^https?:\/\//i.test(trimmed)
     ? trimmed
-    : `https://${fallbackHost}/${trimmed.replace(/^\/+/, "")}`;
+    : `https://${fallbackHost}/${trimmed.replace(/^\/+/, '')}`;
 
   try {
     const url = new URL(normalized);
-    url.searchParams.set("text", message);
+    url.searchParams.set('text', message);
     return url.toString();
   } catch {
     return normalized;
@@ -100,16 +91,9 @@ function TelegramIcon() {
   );
 }
 
-export function ContactBoard({
-  companies,
-  datasetId,
-  eyebrow,
-  title,
-}: ContactBoardProps) {
+export function ContactBoard({ companies, datasetId, eyebrow, title }: ContactBoardProps) {
   const storageKey = `leadlist:processed:v1:${datasetId}`;
-  const [sessionProcessed, setSessionProcessed] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [sessionProcessed, setSessionProcessed] = useState<Set<string>>(() => new Set());
   const [lastRemoved, setLastRemoved] = useState<Company | null>(null);
 
   const subscribe = useCallback(
@@ -123,10 +107,10 @@ export function ContactBoard({
         }
       };
 
-      window.addEventListener("storage", onStorage);
+      window.addEventListener('storage', onStorage);
       window.addEventListener(storageEventName, onLocalStorage);
       return () => {
-        window.removeEventListener("storage", onStorage);
+        window.removeEventListener('storage', onStorage);
         window.removeEventListener(storageEventName, onLocalStorage);
       };
     },
@@ -135,41 +119,28 @@ export function ContactBoard({
 
   const getSnapshot = useCallback(() => {
     try {
-      return window.localStorage.getItem(storageKey) ?? "[]";
+      return window.localStorage.getItem(storageKey) ?? '[]';
     } catch {
-      return "[]";
+      return '[]';
     }
   }, [storageKey]);
 
-  const getServerSnapshot = useCallback(() => "[]", []);
-  const storedSnapshot = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  );
-  const storedProcessed = useMemo(
-    () => new Set(safeStoredIds(storedSnapshot)),
-    [storedSnapshot],
-  );
+  const getServerSnapshot = useCallback(() => '[]', []);
+  const storedSnapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const storedProcessed = useMemo(() => new Set(safeStoredIds(storedSnapshot)), [storedSnapshot]);
   const processed = useMemo(
     () => new Set([...storedProcessed, ...sessionProcessed]),
     [sessionProcessed, storedProcessed],
   );
-  const visibleCompanies = companies.filter(
-    (company) => !processed.has(company.id),
-  );
+  const visibleCompanies = companies.filter((company) => !processed.has(company.id));
   const processedCount = companies.length - visibleCompanies.length;
-  const progress = companies.length
-    ? Math.round((processedCount / companies.length) * 100)
-    : 0;
+  const progress = companies.length ? Math.round((processedCount / companies.length) * 100) : 0;
 
   const persist = useCallback(
     (ids: Set<string>) => {
       try {
         window.localStorage.setItem(storageKey, JSON.stringify([...ids]));
-        window.dispatchEvent(
-          new CustomEvent(storageEventName, { detail: storageKey }),
-        );
+        window.dispatchEvent(new CustomEvent(storageEventName, { detail: storageKey }));
       } catch {
         // Session state still keeps the interface usable if storage is blocked.
       }
@@ -178,11 +149,7 @@ export function ContactBoard({
   );
 
   const contact = (company: Company, channel: ContactChannel, url: string) => {
-    const target = addMessageToLink(
-      url,
-      channel,
-      getRandomMessage(company.name),
-    );
+    const target = addMessageToLink(url, channel, getRandomMessage(company.name));
 
     const nextSession = new Set(sessionProcessed).add(company.id);
     const nextStored = new Set(storedProcessed).add(company.id);
@@ -190,10 +157,10 @@ export function ContactBoard({
     setLastRemoved(company);
     persist(nextStored);
 
-    if (channel === "whatsapp") {
+    if (channel === 'whatsapp') {
       window.location.assign(target);
     } else {
-      window.open(target, "_blank", "noopener,noreferrer");
+      window.open(target, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -234,8 +201,8 @@ export function ContactBoard({
           <p className="eyebrow">{eyebrow}</p>
           <h1>{title}</h1>
           <p className="board-description">
-            Выберите мессенджер — готовое предложение подставится автоматически,
-            а компания исчезнет из списка.
+            Выберите мессенджер — готовое предложение подставится автоматически, а компания исчезнет
+            из списка.
           </p>
         </div>
 
@@ -267,11 +234,8 @@ export function ContactBoard({
                   <button
                     type="button"
                     className="contact-button whatsapp-button"
-                    onClick={() =>
-                      contact(company, "whatsapp", company.whatsapp!)
-                    }
-                    aria-label={`Написать ${company.name} в WhatsApp`}
-                  >
+                    onClick={() => contact(company, 'whatsapp', company.whatsapp!)}
+                    aria-label={`Написать ${company.name} в WhatsApp`}>
                     <WhatsAppIcon />
                     <span>WhatsApp</span>
                   </button>
@@ -280,11 +244,8 @@ export function ContactBoard({
                   <button
                     type="button"
                     className="contact-button telegram-button"
-                    onClick={() =>
-                      contact(company, "telegram", company.telegram!)
-                    }
-                    aria-label={`Написать ${company.name} в Telegram`}
-                  >
+                    onClick={() => contact(company, 'telegram', company.telegram!)}
+                    aria-label={`Написать ${company.name} в Telegram`}>
                     <TelegramIcon />
                     <span>Telegram</span>
                   </button>
