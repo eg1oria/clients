@@ -1,0 +1,227 @@
+{
+  "name": "Primerka — Lead to Customer Demo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "primerka-user-event",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000001",
+      "name": "User Event Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-920, -160],
+      "webhookId": "primerka-user-event-demo"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "field-user-id", "name": "userId", "value": "={{ $json.body?.userId || $json.userId || 'vk_demo' }}", "type": "string" },
+            { "id": "field-name", "name": "name", "value": "={{ $json.body?.name || $json.name || 'Пользователь' }}", "type": "string" },
+            { "id": "field-source", "name": "source", "value": "vk", "type": "string" },
+            { "id": "field-segment", "name": "segment", "value": "={{ $json.body?.segment || 'basic_wardrobe' }}", "type": "string" },
+            { "id": "field-stage", "name": "funnelStage", "value": "lead_magnet", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000002",
+      "name": "Normalize User",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-680, -160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            { "id": "contact-condition", "leftValue": "={{ Boolean($json.contactExists) }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000003",
+      "name": "Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-440, -160]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "update-action", "name": "crmAction", "value": "update_lead", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000004",
+      "name": "Update Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-200, -250]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "create-action", "name": "crmAction", "value": "create_lead", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000005",
+      "name": "Create Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-200, -70]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "segment-action", "name": "segment", "value": "={{ $json.segment || 'basic_wardrobe' }}", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000006",
+      "name": "Assign Segment",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [40, -160]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "crm-placeholder", "name": "integrationNote", "value": "CRM endpoint is connected during implementation", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000007",
+      "name": "CRM Placeholder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, -160]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "message-placeholder", "name": "nextMessage", "value": "lead_magnet_delivery", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000008",
+      "name": "Message Placeholder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [520, -160]
+    },
+    {
+      "parameters": { "amount": 1, "unit": "minutes" },
+      "id": "a1a2a3a4-1000-4000-8000-000000000009",
+      "name": "Wait for Next Event",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [760, -160],
+      "webhookId": "primerka-wait-demo"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "primerka-payment-event",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000010",
+      "name": "Payment Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-440, 190],
+      "webhookId": "primerka-payment-event-demo"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            { "id": "payment-condition", "leftValue": "={{ $json.body?.paymentStatus || $json.paymentStatus }}", "rightValue": "paid", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000011",
+      "name": "Payment Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-200, 190]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "product-field", "name": "product", "value": "={{ $json.body?.product || 'basic_wardrobe_guide' }}", "type": "string" },
+            { "id": "access-field", "name": "accessGranted", "value": true, "type": "boolean" }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000012",
+      "name": "Grant Product Access",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [40, 190]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [{ "id": "delivery-placeholder", "name": "deliveryAction", "value": "send_product_link", "type": "string" }] },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000013",
+      "name": "Delivery Placeholder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [280, 190]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "customer-stage", "name": "funnelStage", "value": "customer", "type": "string" },
+            { "id": "customer-payment", "name": "paymentStatus", "value": "paid", "type": "string" },
+            { "id": "followup-action", "name": "nextAction", "value": "post_purchase_follow_up", "type": "string" }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a1a2a3a4-1000-4000-8000-000000000014",
+      "name": "Update Customer and Follow-up",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [520, 190]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "User Event Webhook": { "main": [[{ "node": "Normalize User", "type": "main", "index": 0 }]] },
+    "Normalize User": { "main": [[{ "node": "Contact Exists?", "type": "main", "index": 0 }]] },
+    "Contact Exists?": {
+      "main": [
+        [{ "node": "Update Lead", "type": "main", "index": 0 }],
+        [{ "node": "Create Lead", "type": "main", "index": 0 }]
+      ]
+    },
+    "Update Lead": { "main": [[{ "node": "Assign Segment", "type": "main", "index": 0 }]] },
+    "Create Lead": { "main": [[{ "node": "Assign Segment", "type": "main", "index": 0 }]] },
+    "Assign Segment": { "main": [[{ "node": "CRM Placeholder", "type": "main", "index": 0 }]] },
+    "CRM Placeholder": { "main": [[{ "node": "Message Placeholder", "type": "main", "index": 0 }]] },
+    "Message Placeholder": { "main": [[{ "node": "Wait for Next Event", "type": "main", "index": 0 }]] },
+    "Payment Webhook": { "main": [[{ "node": "Payment Valid?", "type": "main", "index": 0 }]] },
+    "Payment Valid?": { "main": [[{ "node": "Grant Product Access", "type": "main", "index": 0 }], []] },
+    "Grant Product Access": { "main": [[{ "node": "Delivery Placeholder", "type": "main", "index": 0 }]] },
+    "Delivery Placeholder": { "main": [[{ "node": "Update Customer and Follow-up", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "b1b2b3b4-2000-4000-8000-000000000001",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}
