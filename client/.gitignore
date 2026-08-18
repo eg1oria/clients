@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# FrontPage-метаданные внутри статического справочника (для сайта не нужны)
+public/spravochnik/**/_vti_cnf/
+public/spravochnik/**/_vti_pvt/
