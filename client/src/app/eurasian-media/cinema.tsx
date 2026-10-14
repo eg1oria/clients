@@ -101,7 +101,8 @@ export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?
     const stage = stageRef.current;
     if (!stage) return;
     const distance = stage.offsetHeight - window.innerHeight;
-    const top = stage.getBoundingClientRect().top + window.scrollY + (holdMiddle(i) / units) * distance;
+    const top =
+      stage.getBoundingClientRect().top + window.scrollY + (holdMiddle(i) / units) * distance;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
   };
