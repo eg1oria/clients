@@ -29,7 +29,15 @@ const transStart = (i: number) => INTRO + HOLD + (i - 1) * (HOLD + TRANS);
 /** Середина «паузы» на сцене i — сюда скроллим по клику в навигации */
 const holdMiddle = (i: number) => (i === 0 ? INTRO + HOLD / 2 : transStart(i) + TRANS + HOLD / 2);
 
-export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?: string }) {
+export function Cinema({
+  brand,
+  scenes,
+  className = "",
+}: {
+  brand: string;
+  scenes: Scene[];
+  className?: string;
+}) {
   const stageRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
 
@@ -113,7 +121,7 @@ export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?
         ref={stageRef}
         className={styles.stage}
         style={{ "--units": units } as CSSProperties}
-        aria-label="Проекты Eurasian Media"
+        aria-label={`Проекты ${brand}`}
       >
         <div className={styles.viewport}>
           {scenes.map((scene, i) => (
@@ -159,7 +167,7 @@ export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?
             <div className={styles.barBottom} aria-hidden="true" />
             <div className={styles.wordmark}>
               <h1>
-                <LoadLine text="Eurasian Media" />
+                <LoadLine text={brand} />
               </h1>
               <p className={styles.tagline}>Истории, рождённые между Европой и Азией</p>
             </div>
@@ -167,7 +175,7 @@ export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?
           </div>
 
           <header className={styles.top}>
-            <span className={styles.logo}>Eurasian Media</span>
+            <span className={styles.logo}>{brand}</span>
             <span className={styles.counter} aria-hidden="true">
               <span className={styles.counterMask}>
                 <span className={styles.counterStrip}>
@@ -194,7 +202,7 @@ export function Cinema({ scenes, className = "" }: { scenes: Scene[]; className?
         </div>
       </section>
 
-      <Outro onReplay={() => jumpTo(0)} />
+      <Outro brand={brand} onReplay={() => jumpTo(0)} />
     </main>
   );
 }
@@ -223,20 +231,28 @@ function SplitTitle({ text }: { text: string }) {
   );
 }
 
-/** Строка вордмарка, которая проявляется по буквам при загрузке */
+/** Строка вордмарка, которая проявляется по буквам при загрузке; длинное название переносится по словам */
 function LoadLine({ text }: { text: string }) {
+  let index = 0;
   return (
     <span className={styles.loadLine} aria-label={text}>
-      {Array.from(text).map((char, i) => (
-        <span key={i} aria-hidden="true" style={{ "--i": i } as CSSProperties}>
-          {char === " " ? " " : char}
+      {text.split(" ").map((word, w) => (
+        <span key={w} className={styles.loadWord} aria-hidden="true">
+          {Array.from(word).map((char) => {
+            const i = index++;
+            return (
+              <span key={i} style={{ "--i": i } as CSSProperties}>
+                {char}
+              </span>
+            );
+          })}
         </span>
       ))}
     </span>
   );
 }
 
-function Outro({ onReplay }: { onReplay: () => void }) {
+function Outro({ brand, onReplay }: { brand: string; onReplay: () => void }) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -271,7 +287,7 @@ function Outro({ onReplay }: { onReplay: () => void }) {
         </button>
       </div>
       <footer className={styles.footer}>
-        <span>© Eurasian Media</span>
+        <span>© {brand}</span>
         <span>Кино · Сериалы</span>
       </footer>
     </section>

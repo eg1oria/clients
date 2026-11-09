@@ -209,12 +209,20 @@
 }
 
 .loadLine {
-  display: block;
-  overflow: clip;
-  padding: 0.06em 0 0.1em;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.32em;
 }
 
-.loadLine span {
+.loadWord {
+  display: inline-block;
+  overflow: clip;
+  padding: 0.06em 0 0.1em;
+  white-space: nowrap;
+}
+
+.loadWord span {
   display: inline-block;
   animation: rise 1.2s var(--ease) both;
   animation-delay: calc(0.2s + var(--i) * 40ms);
@@ -506,7 +514,7 @@
     opacity: calc(var(--in, 0) - var(--out, 0));
   }
 
-  .loadLine span,
+  .loadWord span,
   .tagline,
   .hint,
   .hint::after {

@@ -19,11 +19,24 @@ const serif = Cormorant_Garamond({
   style: ["italic"],
 });
 
-export const metadata: Metadata = {
-  title: "Eurasian Media — истории, рождённые между Европой и Азией",
-  description:
-    "Кино и сериалы о людях Центральной Азии: драмы, комедии, спорт и триллеры.",
-};
+const DEFAULT_BRAND = "Eurasian Media";
+
+/** Название бренда можно подменить ссылкой: /eurasian-media?name=Qazaq Film */
+async function readBrand(searchParams: PageProps<"/eurasian-media">["searchParams"]) {
+  const { name } = await searchParams;
+  const value = (Array.isArray(name) ? name[0] : name)?.trim().replace(/\s+/g, " ").slice(0, 40);
+  return value || DEFAULT_BRAND;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/eurasian-media">): Promise<Metadata> {
+  const brand = await readBrand(searchParams);
+  return {
+    title: `${brand} — истории, рождённые между Европой и Азией`,
+    description: "Кино и сериалы о людях Центральной Азии: драмы, комедии, спорт и триллеры.",
+  };
+}
 
 // Тексты-заглушки: замените названия и логлайны на реальные проекты.
 const scenes: Scene[] = [
@@ -60,6 +73,9 @@ const scenes: Scene[] = [
   },
 ];
 
-export default function EurasianMediaPage() {
-  return <Cinema scenes={scenes} className={`${display.variable} ${serif.variable}`} />;
+export default async function EurasianMediaPage({ searchParams }: PageProps<"/eurasian-media">) {
+  const brand = await readBrand(searchParams);
+  return (
+    <Cinema brand={brand} scenes={scenes} className={`${display.variable} ${serif.variable}`} />
+  );
 }
